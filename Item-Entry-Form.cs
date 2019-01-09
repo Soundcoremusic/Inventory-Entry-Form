@@ -24,15 +24,14 @@ namespace SoundCoreMenus{
 	public class App
 	{
 		//Path which contains all the XML that will be edited by the application
-		static string DatabasePath = Application.StartupPath + @"\db_files\";
+		static string DatabasePath = Application.StartupPath + @"\scdb\";
+		private static string PicturesPath = @"E:\Pictures\";
+		
 	
 	
 		[STAThread]
 		static public void Main()
-		{
-		
-			MessageBox.Show("Root Database Exists:  " + Directory.Exists(DatabasePath));
-			
+		{		
 			EntryForm StartupForm = new EntryForm();
 			StartupForm.ShowDialog();
 		}
@@ -41,7 +40,7 @@ namespace SoundCoreMenus{
 		public class EntryForm : Form
 		{
 			
-				
+				DateTime EnteredTime = new DateTime();
 				//Common Item types, brands, and manufacturers
 				string[] ItemStrings = new string[8]{"Amplifier", "Guitar", "Keyboard", "Lighting", "Microphone", "PA Equipment", "Percussion", "Speaker"};
 				string[] Guitar_Brands = new string[13]{"Alvarez", "Austin", "Cordoba", "Dean", "Epiphone", "ESP", "Fender", "LTD","Martin", "Schecter", "Sigma", "Washburn", "Yamaha"};
@@ -205,6 +204,11 @@ namespace SoundCoreMenus{
 					foreach(string Item in ItemStrings)
 						ItemType.Items.Add(Item);
 			
+					foreach(string Condition in Item_Conditions)
+					{
+						ConditionInput.Items.Add(Condition);
+					}
+			
 					this.Text = "Sound Core - Database Entry";
 					this.StartPosition = FormStartPosition.CenterScreen;
 					this.MaximizeBox = false;
@@ -274,7 +278,7 @@ namespace SoundCoreMenus{
 				
 				private void PhotoSelect_Click(object sender, EventArgs e)
 				{
-					//Clear the list of files in c
+					//Clear the list of files
 					
 					OpenFileDialog SelectFiles = new OpenFileDialog();
 					SelectFiles.Filter = "Images (*.BMP;*.JPG;*.GIF)|*.BMP;*.JPG;*.GIF|" + "All files (*.*)|*.*";
@@ -351,6 +355,9 @@ namespace SoundCoreMenus{
 
 				}
 				
+				
+				///<summary>
+				///
 				private void Manufacturer_SelectedValueChanged(object sender, EventArgs e)
 				{
 					if(Manufacturer.SelectedItem != null)
@@ -362,11 +369,8 @@ namespace SoundCoreMenus{
 						SerialNumberInput.Enabled = true;
 						Description.Enabled = true;
 						
-						foreach(string Condition in Item_Conditions)
-						{
-							ConditionInput.Items.Add(Condition);
-						}
-						
+/* 						
+						 */
 					}
 						
 					
@@ -375,54 +379,53 @@ namespace SoundCoreMenus{
 				
 				private void EnterItem_Click(object sender, EventArgs e)
 				{
-					XDocument XMLDatabaseFile = new XDocument();
+					
 					bool CorrectInfo = CheckFormFields();
 					string ItemInput = ItemType.GetItemText(ItemType.SelectedItem);
 					
+					
+					
+					
+					
 					if(CorrectInfo)
 					{
-						//Get the Item type from the form, in order to create the create XML object
-						string[] ItemInfo = new string[] {Manufacturer.GetItemText(Manufacturer.SelectedItem), ModelNumber.Text,SerialNumberInput.Text, Description.Text, ConditionInput.GetItemText(ConditionInput.Text)};
-						
-						float price = 0;
-						//Item price check. Checks for negative prices and characters in the price.	
-						bool CorrectPrice = float.TryParse(PriceInput.Text, out price);
-						string Message;
-						
 						try{
+							
+							string FileName;
+						
 							switch(ItemInput)
 							{
 								case "Guitar":
-									Item Guitar = new Item(ItemCategory.Guitar);
-									Message = Guitar.ToXML(ItemInfo[0], ItemInfo[1], ItemInfo[2], ItemInfo[3].ToCharArray(),PhotoFilesList, ItemInfo[4], price);
-									XMLDatabaseFile = XDocument.Load(App.DatabasePath+"Guitars.xml");
-									
-									XElement root = XMLDatabaseFile.Element("GUITARLIST");
-									IEnumerable<XElement> rows = root.Descendants("Guitar");
-									XElement LastRow= root.LastNode;
-									LastRow.AddAfterSelf(XElement.Parse(Message));
-									
+									FileName = "Guitars.xml";
+									AddItem(FileName);
 								break;
 								case "Amplifier":
-									
+									FileName = "Amplifiers.xml";
+									AddItem(FileName);
 								break;
 								case "Keyboard":
-								
+									FileName = "Keyboards.xml";
+									AddItem(FileName);
 								break;
 								case "Lighting":
-									
+									FileName = "Lighting.xml";
+									AddItem(FileName);
 								break;
 								case "Microphone":
-									
+									FileName = "Microphones.xml";
+									AddItem(FileName);
 								break;
-								case "PA":
-									
+								case "PA":	
+									FileName = "PA-Equipment.xml";
+									AddItem(FileName);
 								break;
 								case "Percussion":
-								
+									FileName = "Percussion.xml";
+									AddItem(FileName);
 								break;
 								case "Speaker":
-								
+									FileName = "Speakers.xml";
+									AddItem(FileName);
 								break;
 							}
 						}catch(Exception Ex)
@@ -431,13 +434,109 @@ namespace SoundCoreMenus{
 							
 						}
 						
-						
-						MessageBox.Show("Item successfully added.", "Successful Item Entry", MessageBoxButtons.OK, MessageBoxIcon.Information);
 						ClearFormFields();
 					}
 				
 					
 				}
+		
+		
+		
+				///<summary>
+				///Loads a user specifed XML document, appends an item to the end, and saves the document.
+				///</summary>
+				private void AddItem(string FileName)
+				{
+					//Create an empty XML Document
+					XDocument XMLDatabaseFile = new XDocument();
+					
+					//Get the Item type from the form, in order to create the create XML object
+					string[] ItemInfo = new string[] {Manufacturer.GetItemText(Manufacturer.SelectedItem),
+						ModelNumber.Text,
+						SerialNumberInput.Text, 
+						Description.Text,
+						ConditionInput.GetItemText(ConditionInput.Text)
+					};
+					
+					//Item price check. Checks for negative prices and characters in the price.
+					float price = 0;						
+					bool CorrectPrice = float.TryParse(PriceInput.Text, out price);
+				
+					//Create the base Item XML
+					XElement ItemXML = new XElement("Item");
+					FileStream XmlInfo = new FileStream("./scdb/"+FileName, FileMode.Open);
+			
+					try
+					{
+						XMLDatabaseFile = XDocument.Load(XmlInfo);
+						XmlInfo.Close();
+						//MessageBox.Show("Adding to " + XMLDatabaseFile.Root.Name.ToString() + " Database.");
+						ItemXML.Add(new XElement("Manufacturer",ItemInfo[0]));
+						ItemXML.Add(new XElement("Model",ItemInfo[1]));
+						ItemXML.Add(new XElement("SerialNumber",ItemInfo[2]));
+						ItemXML.Add(new XElement("Condition",ItemInfo[4]));
+						ItemXML.Add(new XElement("Price", price));
+						ItemXML.Add(new XElement("Description",ItemInfo[3]));
+						ItemXML.Add(new XElement("DateAdded", DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()));
+						XElement Pictures = new XElement("ItemPics");
+						foreach(var FilePath in PhotoFilesList)
+						{
+							Pictures.Add(new XElement("Picture", FilePath));
+						}
+						ItemXML.Add(Pictures);
+						XNode LastItem = XMLDatabaseFile.Root.LastNode;
+						
+						
+						if(LastItem == null)
+						{
+							XMLDatabaseFile.Root.Add(ItemXML);	
+							
+						}else if(LastItem != null)
+						{
+							LastItem.AddAfterSelf(ItemXML);
+						}
+						
+						XMLDatabaseFile.Save("./scdb/"+FileName);
+					}
+					catch(Exception e)
+					{
+						MessageBox.Show(e.ToString());
+						
+					}
+					
+					switch(FileName)
+					{
+						case "Amplifiers.xml":
+							MessageBox.Show("Amplifier Added.");
+						break;
+						case "Guitars.xml":
+							MessageBox.Show("Guitar Added.");
+						break;
+						case "Keyboards.xml":
+							MessageBox.Show("Keyboard Added.");
+						break;
+						case "Lighting.xml":
+							MessageBox.Show("Lighting Added.");
+						break;
+						case "Microphones.xml":
+							MessageBox.Show("Microphones Added.");
+						break;
+						case "PA-Equipment.xml":
+							MessageBox.Show("PA Item Added.");
+						break;
+						case "Percussion.xml":
+							MessageBox.Show("Percussion Item Added.");
+						break;
+						case "Speakers.xml":
+							MessageBox.Show("Speaker Added.");
+						break;
+						
+					}
+					
+					
+					
+				}
+		
 		
 				///<summary>
 				///Clears the controls of the form so that they are ready for entering a new item.
@@ -470,8 +569,7 @@ namespace SoundCoreMenus{
 					this.ItemType.Enabled = true;
 					
 				}
-	
-	
+
 				///<summary>
 				///Checks the controls of the form for missing information or information that is entered incorrectly.
 				///</summary>
@@ -497,7 +595,7 @@ namespace SoundCoreMenus{
 					PriceInput.ForeColor = Color.Black;
 				
 					//Get the description of the item, make sure it is less than 500 characters.
-					//Using less than 500 characters to save on file sizes.
+					//Using less than 500 characters saves on file sizes.
 					string DescriptionBuffer;
 					DescriptionBuffer = this.Description.Text;
 					char[] ItemDescription = new char[500];
@@ -516,9 +614,7 @@ namespace SoundCoreMenus{
 						return false;
 					}
 					Description.ForeColor = Color.Black;
-					
-					//Check for 
-					
+									
 					return true;
 				}
 	
