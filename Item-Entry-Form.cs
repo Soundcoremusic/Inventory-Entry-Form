@@ -25,7 +25,7 @@ namespace SoundCoreMenus{
 	{
 		//Path which contains all the XML that will be edited by the application
 		static string DatabasePath = Application.StartupPath + @"\scdb\";
-		private static string PicturesPath = @"E:\Pictures\";
+		private static string PicturesPath = @"O:/UwAmp/www/Item-Database/Pictures";
 		
 	
 	
@@ -42,7 +42,7 @@ namespace SoundCoreMenus{
 			
 				DateTime EnteredTime = new DateTime();
 				//Common Item types, brands, and manufacturers
-				string[] ItemStrings = new string[8]{"Amplifier", "Guitar", "Keyboard", "Lighting", "Microphone", "PA Equipment", "Percussion", "Speaker"};
+				string[] ItemStrings = new string[9]{"Amplifier", "Effects Pedal","Guitar", "Keyboard", "Lighting", "Microphone", "PA Equipment", "Percussion", "Speaker"};
 				string[] Guitar_Brands = new string[13]{"Alvarez", "Austin", "Cordoba", "Dean", "Epiphone", "ESP", "Fender", "LTD","Martin", "Schecter", "Sigma", "Washburn", "Yamaha"};
 				string[] Amp_Brands = new string[9]{"Boss", "Lee Jackson", "Egnater", "Fender", "Marshall", "Ampeg", "Crate", "Peavey", "Hartke"};
 				string[] Keyboard_Brands = new string[3]{"Casio", "Roland", "Yamaha"};
@@ -52,6 +52,7 @@ namespace SoundCoreMenus{
 				string[] Percussion_Brands = new string[11]{"DDRUM","CB Percussion","Gretsch","Gibraltar","LP","Mapex","Sabian","Pearl","Pro-Mark","Vic Firth", "Zildjian"};
 				string[] Speaker_Brands = new string[2] {"Celestion","JBL"};
 				string[] Item_Conditions = new string[4] {"Brand New", "Excellent", "Good", "Poor"};
+				string[] Effects_Pedals = new string[7] {"Boss", "Digitech", "Electro-Harmonix", "Outlaw Effects", "MXR", "Vox", "Dunlop"};
 				private List<string> PhotoFilesList = new List<string>();
 				
 				//Create the components of the form
@@ -64,6 +65,7 @@ namespace SoundCoreMenus{
 				Label DescLabel = new Label();
 				Label ConditionLabel = new Label();
 				Label ModelLabel = new Label();
+				Label ExternalLinkLabel = new Label();
 				ComboBox ItemType = new ComboBox();
 				ComboBox Manufacturer = new ComboBox(); 
 				ComboBox ConditionInput = new ComboBox();
@@ -71,6 +73,7 @@ namespace SoundCoreMenus{
 				TextBox ModelNumber = new TextBox();
 				TextBox SerialNumberInput = new TextBox();
 				TextBox Description = new TextBox();
+				TextBox ExternalLink = new TextBox();
 				ListBox PhotoList = new ListBox();
 				ButtonBase EnterItem = new Button();
 				ButtonBase PhotoSelect = new Button();
@@ -87,7 +90,7 @@ namespace SoundCoreMenus{
 					//Initialize the Components properties
 					
 					//Default sizes for comboboxes, combobox labels, and buttons 
-					Size DefaultButtonSize = new Size(90,50);
+					Size DefaultButtonSize = new Size(90,40);
 					Size DefaultComboBox = new Size(150,20);
 					
 				
@@ -103,18 +106,19 @@ namespace SoundCoreMenus{
 					ConditionLabel.Size = DefaultComboBox;
 					ModelNumber.Size = DefaultComboBox;
 					ModelLabel.Size = DefaultComboBox;
+					EnterItem.Size = DefaultButtonSize;
+					PhotoSelect.Size = DefaultButtonSize;
+					PhotoRemove.Size = DefaultButtonSize;	
+						
 						
 					FormTitle.Size = new Size(400,40);
 					PhotoLabel.Size = new Size(250,15);
 					DescLabel.Size = new Size(260,20);
 					Description.Size = new Size(310,80);
-
-					EnterItem.Size = DefaultButtonSize;
-					PhotoSelect.Size = DefaultButtonSize;
-					PhotoRemove.Size = DefaultButtonSize;
-					PhotoList.Size = new Size(250,55);
+					PhotoList.Size = new Size(250,95);
 					ItemPreview.Size = new Size(250,250);
-					
+					ExternalLink.Size = new Size(310,30);
+					ExternalLinkLabel.Size = new Size(310,24);
 					//Text formatting
 					PhotoSelect.Text = "Select\nPhotos";
 					EnterItem.Text = "\tAdd\n\tItem";
@@ -124,11 +128,11 @@ namespace SoundCoreMenus{
 					ManuLabel.Text = "Manufacturer:";
 					FormTitle.Text = "Database Item Entry";
 					PriceLabel.Text = "Enter Price:";
-					SerialNumberLabel.Text = "Serial Number";
+					SerialNumberLabel.Text = "Serial Number:";
 					DescLabel.Text = "Enter a short description:";
 					ModelLabel.Text = "Model:";
-					ConditionLabel.Text = "Item Condtion";
-					
+					ConditionLabel.Text = "Item Condtion:";
+					ExternalLinkLabel.Text = "External Link:";
 					
 					Font DefaultInputFont = new Font("Arial", 10);
 					Font DefaultLabelFont = new Font("Arial", 12, FontStyle.Bold);
@@ -152,6 +156,7 @@ namespace SoundCoreMenus{
 					PriceInput.Font = DefaultInputFont;
 					ModelNumber.Font = DefaultInputFont;
 					SerialNumberInput.Font = DefaultInputFont;
+					ExternalLinkLabel.Font = DefaultLabelFont;
 					PhotoLabel.TextAlign = ContentAlignment.MiddleCenter;
 					EnterItem.TextAlign = ContentAlignment.MiddleLeft;
 					PhotoSelect.TextAlign = ContentAlignment.MiddleLeft;
@@ -164,14 +169,13 @@ namespace SoundCoreMenus{
 					PhotoSelect.ImageAlign = ContentAlignment.MiddleRight;
 					PhotoRemove.Image = Image.FromFile("Remove-Camera.png");
 					PhotoRemove.ImageAlign = ContentAlignment.MiddleRight;
-					
 					ItemPreview.BorderStyle = BorderStyle.FixedSingle;
 					PhotoList.ScrollAlwaysVisible = true;
 				
 					//Locations
-					EnterItem.Location = new Point(10,350);
-					PhotoSelect.Location = new Point(120,350);
-					PhotoRemove.Location = new Point(230,350);
+					EnterItem.Location = new Point(10,400);
+					PhotoSelect.Location = new Point(120,400);
+					PhotoRemove.Location = new Point(230,400);
 					FormTitle.Location = new Point (150,10);
 					ItemLabel.Location = new Point(10, 70);
 					ItemType.Location = new Point(10, 90);
@@ -185,12 +189,13 @@ namespace SoundCoreMenus{
 					ConditionInput.Location = new Point(10, 210);
 					PriceLabel.Location = new Point(170, 190);
 					PriceInput.Location = new Point(170, 210);
-			
 					PhotoLabel.Location = new Point(330,70);
 					PhotoList.Location = new Point(330,350);	
 					ItemPreview.Location = new Point(330, 90);
 					DescLabel.Location = new Point(10,240);
 					Description.Location = new Point(10,260);
+					ExternalLinkLabel.Location = new Point(10,350);
+					ExternalLink.Location = new Point(10,370);
 					ItemPreview.Image = Image.FromFile("test-image.jpg");
 
 					//Remove user input from combobox
@@ -214,7 +219,7 @@ namespace SoundCoreMenus{
 					this.MaximizeBox = false;
 					this.MinimizeBox = false;
 					this.FormBorderStyle = FormBorderStyle.FixedSingle;
-					this.Size = new Size(600,440);
+					this.Size = new Size(600,480);
 					this.Icon = new Icon("Database.ico", 64,64);	
 					this.Controls.Add(SerialNumberLabel);
 					this.Controls.Add(FormTitle);
@@ -226,6 +231,8 @@ namespace SoundCoreMenus{
 					this.Controls.Add(ConditionInput);
 					this.Controls.Add(PriceInput);
 					this.Controls.Add(Description);
+					this.Controls.Add(ExternalLink);
+					this.Controls.Add(ExternalLinkLabel);
 					this.Controls.Add(ModelLabel);
 					this.Controls.Add(ManuLabel);
 					this.Controls.Add(ConditionLabel);
@@ -244,6 +251,8 @@ namespace SoundCoreMenus{
 					PriceInput.Enabled = false;
 					SerialNumberInput.Enabled = false;
 					Description.Enabled = false;
+					ExternalLink.Enabled = false;		
+				
 				
 				
 					//DELEGATE METHODS AND EVENT HANDLERS
@@ -302,62 +311,68 @@ namespace SoundCoreMenus{
 					
 				}
 				
+				
 				private void ItemType_SelectedValueChanged(object sender, EventArgs e)
 				{
-				
-					if(ItemType.SelectedItem != null)
-					{
-						
-						Manufacturer.Enabled = true;
-						Manufacturer.Items.Clear();		
-						switch(ItemType.SelectedItem.ToString()){
-								case "Guitar":
-									foreach(string Item in Guitar_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								case "Amplifier":
-									foreach(string Item in Amp_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								case "Keyboard":
-									foreach(string Item in Keyboard_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								case "Lighting":
-									foreach(string Item in Lighting_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								case "Microphone":
-									foreach(string Item in Microphone_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								case "PA Equipment":
-									foreach(string Item in PA_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								case "Percussion":
-									foreach(string Item in Percussion_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								case "Speaker":
-									foreach(string Item in Speaker_Brands)
-										Manufacturer.Items.Add(Item);
-								break;
-								default:
-									MessageBox.Show("ERROR: Item Type not recognized!");
-									Application.Exit();
-								break;
-						};
-						
-						
+					try{
+						if(ItemType.SelectedItem != null)
+						{
+							
+							Manufacturer.Enabled = true;
+							Manufacturer.Items.Clear();		
+							switch(ItemType.SelectedItem.ToString()){
+									case "Guitar":
+										foreach(string Item in Guitar_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "Amplifier":
+										foreach(string Item in Amp_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "Keyboard":
+										foreach(string Item in Keyboard_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "Lighting":
+										foreach(string Item in Lighting_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "Microphone":
+										foreach(string Item in Microphone_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "PA Equipment":
+										foreach(string Item in PA_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "Percussion":
+										foreach(string Item in Percussion_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "Speaker":
+										foreach(string Item in Speaker_Brands)
+											Manufacturer.Items.Add(Item);
+									break;
+									case "Effects Pedal":
+										foreach(string Item in Effects_Pedals)
+											Manufacturer.Items.Add(Item);
+									break;
+									default:
+										throw new Exception("Could not add manufacturers to drop down list!");
+									break;
+							};
+						}
+					}catch(Exception Ex){
+						MessageBox.Show(Ex.ToString(),"EXCEPTION", MessageBoxButtons.OK, MessageBoxIcon.Error);
 					}
+						
+				}
 					
 
-				}
-				
 				
 				///<summary>
-				///
+				///Enable other input fields whenever the value of the Manufacturer input changes
+				///</summary>
 				private void Manufacturer_SelectedValueChanged(object sender, EventArgs e)
 				{
 					if(Manufacturer.SelectedItem != null)
@@ -368,6 +383,7 @@ namespace SoundCoreMenus{
 						PriceInput.Enabled = true;
 						SerialNumberInput.Enabled = true;
 						Description.Enabled = true;
+						ExternalLink.Enabled = true;
 						
 /* 						
 						 */
@@ -382,11 +398,7 @@ namespace SoundCoreMenus{
 					
 					bool CorrectInfo = CheckFormFields();
 					string ItemInput = ItemType.GetItemText(ItemType.SelectedItem);
-					
-					
-					
-					
-					
+				
 					if(CorrectInfo)
 					{
 						try{
@@ -427,11 +439,17 @@ namespace SoundCoreMenus{
 									FileName = "Speakers.xml";
 									AddItem(FileName);
 								break;
+								case "Effects Pedal":
+									FileName = "Pedals.xml";
+									AddItem(FileName);
+								break;
+								default:
+									throw new Exception("Item could not be added to database!");
 							}
 						}catch(Exception Ex)
 						{
-							
-							
+							MessageBox.Show(Ex.ToString(),"EXCEPTION", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		
 						}
 						
 						ClearFormFields();
@@ -440,13 +458,14 @@ namespace SoundCoreMenus{
 					
 				}
 		
-		
-		
+	
 				///<summary>
 				///Loads a user specifed XML document, appends an item to the end, and saves the document.
 				///</summary>
 				private void AddItem(string FileName)
 				{
+				    bool FilesCopied = false;
+			
 					//Create an empty XML Document
 					XDocument XMLDatabaseFile = new XDocument();
 					
@@ -455,7 +474,8 @@ namespace SoundCoreMenus{
 						ModelNumber.Text,
 						SerialNumberInput.Text, 
 						Description.Text,
-						ConditionInput.GetItemText(ConditionInput.Text)
+						ConditionInput.GetItemText(ConditionInput.Text),
+						ExternalLink.Text
 					};
 					
 					//Item price check. Checks for negative prices and characters in the price.
@@ -465,6 +485,7 @@ namespace SoundCoreMenus{
 					//Create the base Item XML
 					XElement ItemXML = new XElement("Item");
 					FileStream XmlInfo = new FileStream("./scdb/"+FileName, FileMode.Open);
+					
 			
 					try
 					{
@@ -478,7 +499,10 @@ namespace SoundCoreMenus{
 						ItemXML.Add(new XElement("Price", price));
 						ItemXML.Add(new XElement("Description",ItemInfo[3]));
 						ItemXML.Add(new XElement("DateAdded", DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()));
+						ItemXML.Add(new XElement("ExternalLink", ItemInfo[5]));
+
 						XElement Pictures = new XElement("ItemPics");
+						
 						foreach(var FilePath in PhotoFilesList)
 						{
 							Pictures.Add(new XElement("Picture", FilePath));
@@ -497,43 +521,52 @@ namespace SoundCoreMenus{
 						}
 						
 						XMLDatabaseFile.Save("./scdb/"+FileName);
+						File.Copy("./scdb/"+FileName, @"O:/UwAmp/www/Item-Database/XML/" + FileName,true);
 					}
 					catch(Exception e)
 					{
-						MessageBox.Show(e.ToString());
-						
+						MessageBox.Show(e.ToString(),"EXCEPTION", MessageBoxButtons.OK, MessageBoxIcon.Error);		
 					}
 					
-					switch(FileName)
-					{
-						case "Amplifiers.xml":
-							MessageBox.Show("Amplifier Added.");
-						break;
-						case "Guitars.xml":
-							MessageBox.Show("Guitar Added.");
-						break;
-						case "Keyboards.xml":
-							MessageBox.Show("Keyboard Added.");
-						break;
-						case "Lighting.xml":
-							MessageBox.Show("Lighting Added.");
-						break;
-						case "Microphones.xml":
-							MessageBox.Show("Microphones Added.");
-						break;
-						case "PA-Equipment.xml":
-							MessageBox.Show("PA Item Added.");
-						break;
-						case "Percussion.xml":
-							MessageBox.Show("Percussion Item Added.");
-						break;
-						case "Speakers.xml":
-							MessageBox.Show("Speaker Added.");
-						break;
+					FilesCopied = CopyPhotos(PhotoFilesList);			
+
+					if(FilesCopied){
+					
+						switch(FileName)
+						{
+							case "Amplifiers.xml":
+								MessageBox.Show("Amplifier Added.");
+							break;
+							case "Guitars.xml":
+								MessageBox.Show("Guitar Added.");
+							break;
+							case "Keyboards.xml":
+								MessageBox.Show("Keyboard Added.");
+							break;
+							case "Lighting.xml":
+								
+								MessageBox.Show("Lighting Item Added.");
+							break;
+							case "Microphones.xml":
+								MessageBox.Show("Microphone Added.");
+							break;
+							case "PA-Equipment.xml":
+								MessageBox.Show("PA Item Added.");
+							break;
+							case "Percussion.xml":
+								MessageBox.Show("Percussion Item Added.");
+							break;
+							case "Speakers.xml":
+								MessageBox.Show("Speaker Added.");
+							break;
+							
+						}
+						
+						
+					}else{
+						MessageBox.Show("Item pictures could not be uploaded.","ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						
 					}
-					
-					
 					
 				}
 		
@@ -579,6 +612,7 @@ namespace SoundCoreMenus{
 					float price = 0;
 					//Item price check. Checks for negative prices and characters in the price.	
 					CorrectPrice = float.TryParse(PriceInput.Text, out price);
+					
 					if (CorrectPrice != true){
 						MessageBox.Show("Input price is not a number.","ERROR: Incorrect Price Format",MessageBoxButtons.OK,MessageBoxIcon.Error);
 						PriceInput.ForeColor = Color.Red;
@@ -590,6 +624,7 @@ namespace SoundCoreMenus{
 						PriceInput.ForeColor = Color.Red;
 						return false;
 					}
+					
 				
 					//The price input input is correct, so change the color back to black.
 					PriceInput.ForeColor = Color.Black;
@@ -608,13 +643,68 @@ namespace SoundCoreMenus{
 						return false;
 					}
 					
+					//Check for empty text boxes
+					if(ModelNumber.Text == ""){
+						MessageBox.Show("Please enter a model number", "ERROR: Model Number Missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						ModelNumber.ForeColor = Color.Red;
+						return false;						
+					}
+					ModelNumber.ForeColor = Color.Black;	
+						
+						
+					//Check the Serial Number	
+					if(SerialNumberInput.Text == ""){
+						MessageBox.Show("Please enter a serial number", "ERROR: Serial Number Missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						SerialNumberInput.ForeColor = Color.Red;
+						return false;
+					}	
+					SerialNumberInput.ForeColor = Color.Black;
+					
+					//Check the Condition 
+					if(ConditionInput.Text == ""){
+						MessageBox.Show("Please select the item's condition", "ERROR: Item Condition Missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						ConditionInput.ForeColor = Color.Red;
+						return false;
+					}
+					ConditionInput.ForeColor = Color.Black;
+					
+					//Check the reverb link
+					if(ExternalLink.Text == ""){
+						MessageBox.Show("Please add an external link.", "ERROR: External Link Missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
+						ExternalLink.ForeColor = Color.Red;
+						return false;
+					}
+					ExternalLink.ForeColor = Color.Black;
+					
 					//Check for no photo added.
 					if(PhotoFilesList.Count == 0){
 						MessageBox.Show("Please add at least one photo for the item that you are currently entering", "ERROR: No Photo", MessageBoxButtons.OK, MessageBoxIcon.Error);
 						return false;
 					}
+					
+					
+					//Check Image dimensions
+					foreach(var PhotoFile in PhotoFilesList){
+						
+						using(Image UploadedFile = Image.FromFile(PhotoFile))
+						{
+							string ErrorMsg = "File \"" + PhotoFile + "\" must have square dimensions.";
+							
+							if(UploadedFile.Height != UploadedFile.Width){
+								MessageBox.Show("File \"" + PhotoFile + "\" must have square dimensions.","ERROR: Incorret Picture Dimensions", MessageBoxButtons.OK, MessageBoxIcon.Error);
+								return false;
+							}
+							
+						}
+						
+					}
+					
+	
+					
 					Description.ForeColor = Color.Black;
-									
+								
+
+								
 					return true;
 				}
 	
@@ -634,140 +724,52 @@ namespace SoundCoreMenus{
 					
 				}
 	
+	
+				///<summary>
+				///Copies the user selected photos to the web database. 
+				///</summary>
+					
+				private bool CopyPhotos(List<string> PhotoFileNames)
+				{
+					try{
+						int ListLength = PhotoFileNames.Count;
+						string EnteredCategory = ItemType.GetItemText(ItemType.SelectedItem);
+						string EnteredManufacturer = Manufacturer.GetItemText(Manufacturer.SelectedItem);
+						string EnteredModel = ModelNumber.Text;
+						string NewPhotoPath;
+						
+						
+						if(ItemType.GetItemText(ItemType.SelectedItem) == "PA Equipment")
+							NewPhotoPath = PicturesPath + "/PA Equipment/" + EnteredManufacturer + "/" + EnteredModel + "/";
+						else if(EnteredCategory == "Percussion" || EnteredCategory == "Lighting")
+							NewPhotoPath = PicturesPath + "/" + EnteredCategory + "/" + EnteredManufacturer + "/" + EnteredModel + "/";
+						else
+							NewPhotoPath = PicturesPath + "/" + EnteredCategory + "s/" + EnteredManufacturer + "/" + EnteredModel + "/";
+						
+						Directory.CreateDirectory(NewPhotoPath);
+										
+						for(int x = 0; x < ListLength; x++)
+						{
+							File.Copy(PhotoFileNames[x], NewPhotoPath + Path.GetFileName(PhotoFileNames[x]) );
+						}
+					}catch(Exception e)
+					{
+						MessageBox.Show(e.Message);
+						return false;	
+					}
+					
+					
+					MessageBox.Show("Item photos uploaded.");	
+					return true;
+				}
+		
+		
 		
 		}
 		
 	}
 
-	//Base Item class
-	public class Item
-	{
-			ItemCategory ID;
-			ItemCondition ItemState;
-			XmlWriter DocumentWriter;
-			
-			//Constructor for XML object
-			public Item(ItemCategory ItemClass)
-			{
-				ID = ItemClass;
-			}
-			
-			
-			//This method probably needs cleaning up in the future.
-			///<summary>
-			///Returns the item as a string of XML.
-			///</summary>
-			public string ToXML(string Manufacturer, string ModelNumber, string SerialNumber,char[] desc,List<string> ItemPictures, string Condition, float price)
-			{
-				//Default item tag 
-				XElement ItemInfo = new XElement("Item");
-				
-				try{
-					
-					
-					switch(this.ID)
-					{
-						case ItemCategory.Guitar:
-							ItemInfo.Name = "Guitar";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));
-							ItemInfo.Add(new XElement("ItemDescription", desc)	);
-							
-							XElement ItemPics = new XElement("ItemPics");
-							
-							foreach(string FileName in ItemPictures)
-							{
-								ItemPics.Add(new XElement("Picture", FileName));
-							}
-							
-							ItemInfo.Add(ItemPics);
-							
-						break;
-						case ItemCategory.Amplifier:
-							ItemInfo.Name = "Amplifier";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));
-														
-						break;
-						case ItemCategory.Speaker:
-							ItemInfo.Name = "Speaker";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));						
-							
-						break;
-						case ItemCategory.Keyboard:
-							ItemInfo.Name = "Keyboard";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));						
-						
-						break;
-						case ItemCategory.Microphone:
-							ItemInfo.Name = "Microphone";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));
-							
-						break;
-						case ItemCategory.PA:
-							ItemInfo.Name = "PA";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));
-							
-						break;
-						case ItemCategory.Percussion:
-							ItemInfo.Name = "Percussion";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));
-						break;
-						case ItemCategory.Lighting:
-							ItemInfo.Name = "Lighting";
-							ItemInfo.Add(new XElement("Manufacturer", Manufacturer));
-							ItemInfo.Add(new XElement("Model", ModelNumber));
-							ItemInfo.Add(new XElement("SerialNumber", SerialNumber));
-							ItemInfo.Add(new XElement("Condition",Condition));
-							ItemInfo.Add(new XElement("Price", price));
-							
-						break;
-						default:
-							throw new ArgumentException("Argument Exception: null");
-						break;
-					}
-				}
-				catch(Exception e)
-				{
-					
-				}
-				finally
-				{
 	
-				}
-				
-				return ItemInfo.ToString();
-			}
-			
-			
-			
-	}
 
 }
 
