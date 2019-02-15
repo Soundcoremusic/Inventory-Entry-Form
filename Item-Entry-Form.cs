@@ -12,6 +12,9 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Web;
+using System.Web.UI;
+
 
 namespace SoundCoreMenus{
 	
@@ -27,8 +30,6 @@ namespace SoundCoreMenus{
 		static string DatabasePath = Application.StartupPath + @"\scdb\";
 		private static string PicturesPath = @"O:/UwAmp/www/Item-Database/Pictures";
 		
-	
-	
 		[STAThread]
 		static public void Main()
 		{		
@@ -51,7 +52,7 @@ namespace SoundCoreMenus{
 				string[] PA_Brands = new string[9]{"ALESIS","Behringer", "CAD", "MACKIE", "Soundcraft", "Shure", "Samson","Peavey", "Presonus"};
 				string[] Percussion_Brands = new string[11]{"DDRUM","CB Percussion","Gretsch","Gibraltar","LP","Mapex","Sabian","Pearl","Pro-Mark","Vic Firth", "Zildjian"};
 				string[] Speaker_Brands = new string[2] {"Celestion","JBL"};
-				string[] Item_Conditions = new string[4] {"Brand New", "Excellent", "Good", "Poor"};
+				string[] Item_Conditions = new string[5] {"Brand New", "Excellent", "Good", "Poor","Factory Second"};
 				string[] Effects_Pedals = new string[7] {"Boss", "Digitech", "Electro-Harmonix", "Outlaw Effects", "MXR", "Vox", "Dunlop"};
 				private List<string> PhotoFilesList = new List<string>();
 				
@@ -253,8 +254,6 @@ namespace SoundCoreMenus{
 					Description.Enabled = false;
 					ExternalLink.Enabled = false;		
 				
-				
-				
 					//DELEGATE METHODS AND EVENT HANDLERS
 					ItemType.SelectedValueChanged += new EventHandler(ItemType_SelectedValueChanged);
 					Manufacturer.SelectedValueChanged += new EventHandler(Manufacturer_SelectedValueChanged);
@@ -290,7 +289,7 @@ namespace SoundCoreMenus{
 					//Clear the list of files
 					
 					OpenFileDialog SelectFiles = new OpenFileDialog();
-					SelectFiles.Filter = "Images (*.BMP;*.JPG;*.GIF)|*.BMP;*.JPG;*.GIF|" + "All files (*.*)|*.*";
+					SelectFiles.Filter = "Images (*.bmp;*.jpg;*.gif)|*.BMP;*.JPG;*.GIF|" + "All files (*.*)|*.*";
 					SelectFiles.Title = "Select photos of entered item.";
 					SelectFiles.Multiselect = true;
 					if(SelectFiles.ShowDialog() == DialogResult.OK)
@@ -358,7 +357,7 @@ namespace SoundCoreMenus{
 											Manufacturer.Items.Add(Item);
 									break;
 									default:
-										throw new Exception("Could not add manufacturers to drop down list!");
+										MessageBox.Show("Could not add manufacturers to drop down list!");
 									break;
 							};
 						}
@@ -384,15 +383,17 @@ namespace SoundCoreMenus{
 						SerialNumberInput.Enabled = true;
 						Description.Enabled = true;
 						ExternalLink.Enabled = true;
-						
-/* 						
-						 */
+
 					}
 						
 					
 					
 				}
 				
+				
+				///<summary>
+				///Method that is called when the user chooses to enter an item to the database.
+				///</summary>
 				private void EnterItem_Click(object sender, EventArgs e)
 				{
 					
@@ -449,7 +450,6 @@ namespace SoundCoreMenus{
 						}catch(Exception Ex)
 						{
 							MessageBox.Show(Ex.ToString(),"EXCEPTION", MessageBoxButtons.OK, MessageBoxIcon.Error);
-		
 						}
 						
 						ClearFormFields();
@@ -465,6 +465,7 @@ namespace SoundCoreMenus{
 				private void AddItem(string FileName)
 				{
 				    bool FilesCopied = false;
+					string XmlPath = @"./scdb/";
 			
 					//Create an empty XML Document
 					XDocument XMLDatabaseFile = new XDocument();
@@ -484,67 +485,68 @@ namespace SoundCoreMenus{
 				
 					//Create the base Item XML
 					XElement ItemXML = new XElement("Item");
-					FileStream XmlInfo = new FileStream("./scdb/"+FileName, FileMode.Open);
 					
-			
-					try
-					{
-						XMLDatabaseFile = XDocument.Load(XmlInfo);
-						XmlInfo.Close();
-						//MessageBox.Show("Adding to " + XMLDatabaseFile.Root.Name.ToString() + " Database.");
-						ItemXML.Add(new XElement("Manufacturer",ItemInfo[0]));
-						ItemXML.Add(new XElement("Model",ItemInfo[1]));
-						ItemXML.Add(new XElement("SerialNumber",ItemInfo[2]));
-						ItemXML.Add(new XElement("Condition",ItemInfo[4]));
-						ItemXML.Add(new XElement("Price", price));
-						ItemXML.Add(new XElement("Description",ItemInfo[3]));
-						ItemXML.Add(new XElement("DateAdded", DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()));
-						ItemXML.Add(new XElement("ExternalLink", ItemInfo[5]));
+					try{
 
-						XElement Pictures = new XElement("ItemPics");
-						
-						foreach(var FilePath in PhotoFilesList)
-						{
-							Pictures.Add(new XElement("Picture", FilePath));
-						}
-						ItemXML.Add(Pictures);
-						XNode LastItem = XMLDatabaseFile.Root.LastNode;
-						
-						
-						if(LastItem == null)
-						{
-							XMLDatabaseFile.Root.Add(ItemXML);	
+							//Load the previous xml file.
+							XMLDatabaseFile = XDocument.Load(XmlPath + FileName);
+							//MessageBox.Show("Adding to " + XMLDatabaseFile.Root.Name.ToString() + " Database.");
+							ItemXML.Add(new XElement("Manufacturer",ItemInfo[0]));
+							ItemXML.Add(new XElement("Model",ItemInfo[1]));
+							ItemXML.Add(new XElement("SerialNumber",ItemInfo[2]));
+							ItemXML.Add(new XElement("Condition",ItemInfo[4]));
+							ItemXML.Add(new XElement("Price", price));
+							ItemXML.Add(new XElement("Description",ItemInfo[3]));
+							ItemXML.Add(new XElement("DateAdded", DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToShortTimeString()));
+							ItemXML.Add(new XElement("ExternalLink", ItemInfo[5]));
+
+							XElement Pictures = new XElement("ItemPics");
 							
-						}else if(LastItem != null)
-						{
-							LastItem.AddAfterSelf(ItemXML);
-						}
-						
-						XMLDatabaseFile.Save("./scdb/"+FileName);
-						File.Copy("./scdb/"+FileName, @"O:/UwAmp/www/Item-Database/XML/" + FileName,true);
+							foreach(var FilePath in PhotoFilesList)
+							{
+								Pictures.Add(new XElement("Picture", FilePath));
+							}
+							ItemXML.Add(Pictures);
+							XNode LastItem = XMLDatabaseFile.Root.LastNode;
+							
+							
+							if(LastItem == null)
+							{
+								XMLDatabaseFile.Root.Add(ItemXML);	
+								
+							}else if(LastItem != null)
+							{
+								LastItem.AddAfterSelf(ItemXML);
+							}
+							
+							XMLDatabaseFile.Save("./scdb/"+FileName);
+							File.Copy("./scdb/"+FileName, @"O:/UwAmp/www/Item-Database/XML/" + FileName,true);
 					}
 					catch(Exception e)
 					{
-						MessageBox.Show(e.ToString(),"EXCEPTION", MessageBoxButtons.OK, MessageBoxIcon.Error);		
+						MessageBox.Show(e.Message);
 					}
 					
 					FilesCopied = CopyPhotos(PhotoFilesList);			
+					GenerateItemPage(ItemXML);
 
+					//Flag for verifying copied images.	
 					if(FilesCopied){
 					
+						//Check which item category is being added and display which item type is created.
 						switch(FileName)
 						{
 							case "Amplifiers.xml":
 								MessageBox.Show("Amplifier Added.");
 							break;
 							case "Guitars.xml":
+								
 								MessageBox.Show("Guitar Added.");
 							break;
 							case "Keyboards.xml":
 								MessageBox.Show("Keyboard Added.");
 							break;
 							case "Lighting.xml":
-								
 								MessageBox.Show("Lighting Item Added.");
 							break;
 							case "Microphones.xml":
@@ -576,7 +578,7 @@ namespace SoundCoreMenus{
 				///</summary>
 				private void ClearFormFields()
 				{
-					foreach (Control field in this.Controls)
+					foreach (System.Windows.Forms.Control field in this.Controls)
 					{
 						if (field is TextBox){
 							((TextBox)field).Clear();
@@ -670,9 +672,18 @@ namespace SoundCoreMenus{
 					
 					//Check the reverb link
 					if(ExternalLink.Text == ""){
-						MessageBox.Show("Please add an external link.", "ERROR: External Link Missing", MessageBoxButtons.OK, MessageBoxIcon.Error);
-						ExternalLink.ForeColor = Color.Red;
-						return false;
+						DialogResult DR = MessageBox.Show("Item is missing an external link. An Item Page will be generated. Continue adding item?", "EXCEPTION: External Link Missing", MessageBoxButtons.YesNo,MessageBoxIcon.Exclamation);
+						
+						switch(DR){
+							case DialogResult.Yes:
+								ExternalLink.Text = null;
+								break;	
+							case DialogResult.No:
+								return false;
+							default:
+								return false;
+						}
+						
 					}
 					ExternalLink.ForeColor = Color.Black;
 					
@@ -682,7 +693,6 @@ namespace SoundCoreMenus{
 						return false;
 					}
 					
-					
 					//Check Image dimensions
 					foreach(var PhotoFile in PhotoFilesList){
 						
@@ -691,20 +701,15 @@ namespace SoundCoreMenus{
 							string ErrorMsg = "File \"" + PhotoFile + "\" must have square dimensions.";
 							
 							if(UploadedFile.Height != UploadedFile.Width){
-								MessageBox.Show("File \"" + PhotoFile + "\" must have square dimensions.","ERROR: Incorret Picture Dimensions", MessageBoxButtons.OK, MessageBoxIcon.Error);
+								MessageBox.Show("File \"" + PhotoFile + "\" must have square dimensions.","ERROR: Incorret Picture Dimensions", MessageBoxButtons.OK, MessageBoxIcon.Question);
 								return false;
 							}
 							
 						}
 						
 					}
-					
-	
-					
-					Description.ForeColor = Color.Black;
-								
-
-								
+				
+					Description.ForeColor = Color.Black;	
 					return true;
 				}
 	
@@ -723,12 +728,10 @@ namespace SoundCoreMenus{
 					
 					
 				}
-	
-	
+
 				///<summary>
 				///Copies the user selected photos to the web database. 
 				///</summary>
-					
 				private bool CopyPhotos(List<string> PhotoFileNames)
 				{
 					try{
@@ -737,7 +740,6 @@ namespace SoundCoreMenus{
 						string EnteredManufacturer = Manufacturer.GetItemText(Manufacturer.SelectedItem);
 						string EnteredModel = ModelNumber.Text;
 						string NewPhotoPath;
-						
 						
 						if(ItemType.GetItemText(ItemType.SelectedItem) == "PA Equipment")
 							NewPhotoPath = PicturesPath + "/PA Equipment/" + EnteredManufacturer + "/" + EnteredModel + "/";
@@ -762,15 +764,329 @@ namespace SoundCoreMenus{
 					MessageBox.Show("Item photos uploaded.");	
 					return true;
 				}
+			
+				///<summary>
+				///Creates an HTML page to be uploaded to www.soundcoremusic.com
+				///</summary>
+				private void GenerateItemPage(XElement ItemXML)
+				{
+					const string HTMLPagePath = "./Item/";
+					const string TitleSuffix = "| Sound Core Store";
+					string ItemMFG = ItemXML.Element("Manufacturer").Value.ToString();
+					string ItemModel = ItemXML.Element("Model").Value.ToString();
+					string FullItemName = ItemMFG + " " + ItemModel;
+					string FileName = HTMLPagePath + ItemMFG + "-" + ItemModel + ".html";
+					string StoreCategory = ItemType.GetItemText(ItemType.SelectedItem);
+
+
+					
+					
+					StringWriter SW = new StringWriter();
+			
+					using(HtmlTextWriter PageWriter = new HtmlTextWriter(SW))
+					{
+							PageWriter.AddAttribute("lang", "en");
+							PageWriter.RenderBeginTag(HtmlTextWriterTag.Html);
+							//Create the html elements for the head tag.
+							PageWriter.RenderBeginTag("head"); //Render Begin - head
+							PageWriter.RenderBeginTag("title"); //Render Begin - title
+							PageWriter.Write(ItemMFG + " " + ItemModel + " " + TitleSuffix);
+							PageWriter.RenderEndTag(); //Render End - title
+							PageWriter.AddAttribute("charset","UTF-8"); 
+							PageWriter.RenderBeginTag(HtmlTextWriterTag.Meta); //Render Begin - meta
+							PageWriter.RenderEndTag();// Render End - meta 
+							PageWriter.WriteLine(); 
+							PageWriter.AddAttribute("name","description");
+							PageWriter.AddAttribute("content", ItemMFG + " " + ItemModel + "  from Sound Core\'s online store."); // Render Begin - meta 2
+							PageWriter.RenderBeginTag(HtmlTextWriterTag.Meta); //Render Begin - Meta 2
+							PageWriter.RenderEndTag(); // Rend End - meta 2
+							PageWriter.WriteLine();
+							PageWriter.AddAttribute("name","keywords");
+							PageWriter.AddAttribute("content", "Sound Core Music, Sound Core, Music Store Carbondale,Sound Core " + StoreCategory + "," + FullItemName + "," + ItemModel );		
+							PageWriter.RenderBeginTag(HtmlTextWriterTag.Meta); // Render begin - meta 3
+							PageWriter.RenderEndTag(); // Render End - meta 3
+							PageWriter.WriteLine();
+							//Adding Styles assumes that the program is on a windows machine with drive letter assignments
+							PageWriter.AddAttribute("href","E:\\Database-Item-Entry\\css\\Items.css");
+							PageWriter.RenderBeginTag(HtmlTextWriterTag.Style); // Begin style sheet reference
+							PageWriter.RenderEndTag();//End style sheet reference 
+							PageWriter.RenderEndTag(); //Render End - head
+							PageWriter.WriteLine(); 
+							PageWriter.RenderBeginTag(HtmlTextWriterTag.Body); // Begin rendering the body tag	
+								
+							//Create the main sections of the document.
+							CreateHTMLHeader(PageWriter);
+							CreateHTMLNav(PageWriter);
+							CreateHTMLFooter(PageWriter);
+							
+							PageWriter.RenderEndTag();// End Rendering the body tag
+							PageWriter.Indent++;
+							
+							PageWriter.Indent--;
+							PageWriter.RenderEndTag(); // End Rendering HTML tag
+					}
+					
+					File.WriteAllText(FileName,SW.ToString());
+					SW.Dispose();
+				}
 		
+				///<summary>
+				///Creates the HTML markup for Sound Core's Header
+				///</summary>
+				private void CreateHTMLHeader(HtmlTextWriter PageMaker)
+				{	
+					//THESE DON'T CHANGE
+					string ScLogoPath = "../images/scLogo.png";
+					string TextLogoPath = "../images/logo.png";
+					string[] PhoneAddress = new string[]{"Retail", "Studio", "24 Hr"};
+					string[] PhoneNumbers = new string[]{"(618) 457-0280", "(618) 519-9326","(618) 457-5641"};
+				
+					//Add the Main Icon
+					PageMaker.RenderBeginTag("header");
+					PageMaker.AddAttribute("id","scLogo");
+					PageMaker.AddAttribute("src",ScLogoPath);
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Img);
+					PageMaker.RenderEndTag();
+					PageMaker.WriteLine();
+					
+					//Add the Text Logo 
+					PageMaker.AddAttribute("id","Logo");
+					PageMaker.AddAttribute("src", TextLogoPath);
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Img);
+					PageMaker.RenderEndTag();
+					PageMaker.WriteLine();
+					//Create the Hours Table
+					PageMaker.AddAttribute("id","phone");
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Div);
+					PageMaker.AddAttribute("id","phoneNum");
+					PageMaker.Indent++;
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Table);
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Tbody);
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Tr);
+					PageMaker.Indent++;
+					PageMaker.AddAttribute("colspan","2");
+					PageMaker.AddAttribute("text-align","center");
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Td);
+					PageMaker.Write("PHONE");
+					PageMaker.Indent--;
+					PageMaker.RenderEndTag(); //End Render for td
+					PageMaker.RenderEndTag(); //End Render for tr
+					
+					for(int x = 0; x < 3; x++)
+					{
+						PageMaker.RenderBeginTag(HtmlTextWriterTag.Tr);
+						PageMaker.RenderBeginTag(HtmlTextWriterTag.Td);
+						PageMaker.Write(PhoneAddress[x]);
+						PageMaker.RenderEndTag();
+						PageMaker.RenderBeginTag(HtmlTextWriterTag.Td);
+						PageMaker.Write(PhoneNumbers[x]);
+						PageMaker.RenderEndTag();
+						PageMaker.RenderEndTag();
+					}
+					
+					PageMaker.RenderEndTag(); // End Render for tbody
+					PageMaker.RenderEndTag(); //End Render for Table
+					PageMaker.Indent--;
+					
+					
+					PageMaker.RenderEndTag(); //End Render for containing div
+					PageMaker.RenderEndTag(); //End Render for header tag.
+					PageMaker.Indent--;
+					PageMaker.WriteLine();
+				}
 		
+				///<summary>
+				///Creates the HTML markup for Sound Core's Navigation Bar
+				///</summary>
+				private void CreateHTMLNav(HtmlTextWriter PageMaker)
+				{
+					string HomePage = "../../Index.php";
+					Dictionary<string,string> ServicePages = new Dictionary<string,string>();
+					Dictionary<string,string> RentalPages = new Dictionary<string,string>();
+					Dictionary<string,string> ProdPages = new Dictionary<string,string>();
+					Dictionary<string,string> StorePages = new Dictionary<string,string>();
+					PageMaker.Indent++;
+					PageMaker.RenderBeginTag("nav");
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Ul);
+					//The process needs to made into a seperate assembly for the future. 
+					for(int x = 0; x < 5; x++)
+					{
+						PageMaker.WriteLine();
+						
+						if(x == 4){
+							PageMaker.AddAttribute("id","active");
+							PageMaker.AddAttribute("class","active");
+						}
+					
+						PageMaker.RenderBeginTag(HtmlTextWriterTag.Li); //Begin the LI tag
+						
+						switch(x)
+						{
+							case 0:
+								PageMaker.AddAttribute("href",HomePage);
+								PageMaker.WriteLine();
+								PageMaker.Indent++;
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+								PageMaker.Write("Home");
+								PageMaker.Indent--;
+								PageMaker.RenderEndTag();
+								PageMaker.WriteLine();
+								break;
+							case 1:
+								PageMaker.AddAttribute("href","../../Services/Services.php");
+								PageMaker.WriteLine();
+								PageMaker.Indent++;
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+								PageMaker.Write("Services");
+								PageMaker.RenderEndTag();
+								PageMaker.WriteLine();
+								PageMaker.AddAttribute("class","dropdown");
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.Div);
+								ServicePages.Add("Audio & Video Transfers","../../Services/Audio-Video-Transfers.php");
+								ServicePages.Add("Repairs & Set Up","../../Services/Repairs.php");
+								ServicePages.Add("Audio & Video Installs","../../Services/Audio-Video-Installations.php");
+								ServicePages.Add("DJ Services","../../Services/DJ_Services.php");
+
+								foreach(KeyValuePair<string,string> Link in ServicePages)
+								{
+									PageMaker.AddAttribute("href",Link.Value);		
+									PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+									PageMaker.Write(Link.Key);
+									PageMaker.RenderEndTag();
+									PageMaker.WriteLine();
+								}
+								PageMaker.RenderEndTag(); // Render End tag
+								PageMaker.Indent--;
+								PageMaker.WriteLine();	
+								break;
+							case 2:
+								PageMaker.AddAttribute("href","../../Rentals/Rentals.php");
+								PageMaker.WriteLine();
+								PageMaker.Indent++;
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+								PageMaker.Write("Rentals");
+								PageMaker.RenderEndTag();
+								PageMaker.WriteLine();
+								PageMaker.AddAttribute("class","dropdown");
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.Div);
+								RentalPages.Add("PA & Live Sound","../../Rentals/PA-System-Rentals.php");
+								RentalPages.Add("Video Projects","../../Rentals/Video-Projector-Rentals.php");
+								RentalPages.Add("Lights","../../Rentals/Light-Rentals.php");
+								RentalPages.Add("Staging & Trussing","../../Rentals/Stage-Truss-Rentals.php");
+								
+								foreach(KeyValuePair<string,string> Link in RentalPages)
+								{
+									PageMaker.AddAttribute("href",Link.Value);		
+									PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+									PageMaker.Write(Link.Key);
+									PageMaker.RenderEndTag();
+									PageMaker.WriteLine();
+
+								}
+								
+								PageMaker.RenderEndTag();
+								PageMaker.Indent--;
+								PageMaker.WriteLine();
+								break;
+							case 3:
+								PageMaker.AddAttribute("href","../../Productions/Productions.php");
+								PageMaker.WriteLine();
+								PageMaker.Indent++;
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+								PageMaker.Write("Productions");
+								PageMaker.RenderEndTag();
+								PageMaker.WriteLine();
+								PageMaker.AddAttribute("class","dropdown");
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.Div);
+								ProdPages.Add("Video & Film","../../Productions/Film-Video-Production.php");
+								ProdPages.Add("Audio","../../Productions/Studio-Production.php");
+								
+								foreach(KeyValuePair<string,string> Link in RentalPages)
+								{
+									PageMaker.AddAttribute("href",Link.Value);		
+									PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+									PageMaker.Write(Link.Key);
+									PageMaker.RenderEndTag();
+									PageMaker.WriteLine();
+								}
+								PageMaker.RenderEndTag();
+								PageMaker.Indent--;
+								PageMaker.WriteLine();
+								
+								break;
+							case 4:
+								PageMaker.AddAttribute("href","../Store.php");
+								PageMaker.WriteLine();
+								PageMaker.Indent++;
+								PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+								PageMaker.Write("Store");
+								PageMaker.RenderEndTag();
+								PageMaker.Indent--;
+								PageMaker.WriteLine();
+								break;
+						}
+						PageMaker.RenderEndTag(); //End the LI tag
+					}
+					PageMaker.RenderEndTag(); //End the UL Tag
+ 					PageMaker.RenderEndTag(); //End the Nav Tag
+					PageMaker.WriteLine();
+				}
 		
+				///<summary>
+				///Creates the HTML markup for Sound Core footer section.
+				///</summary>
+				private void CreateHTMLFooter(HtmlTextWriter PageMaker)
+				{
+					PageMaker.WriteLine();
+					PageMaker.RenderBeginTag("footer");
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Ul);
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Li);
+					PageMaker.AddAttribute("class","socialLink");
+					PageMaker.AddAttribute("href","https://www.facebook.com/SoundCoure/");
+					PageMaker.AddAttribute("id","facebook");
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.A);
+					PageMaker.AddAttribute("class","social");
+					PageMaker.AddAttribute("src","../images/Facebook.png");
+					PageMaker.RenderBeginTag(HtmlTextWriterTag.Img);
+					PageMaker.RenderEndTag();
+					PageMaker.WriteLine("Like our page on facebook.");
+					PageMaker.RenderEndTag();
+					PageMaker.RenderEndTag();
+					PageMaker.RenderEndTag();
+					PageMaker.RenderEndTag();
+					
+				}
 		}
+		
+		
+		public class Item{
+			
+			//Item Fields
+			private string manufacturer, modelnumber, serialnumber,extlink;
+			//private char[] desc = new char[]();
+			ItemCondition Condition;
+			float price;
+			
+			//Item Properites
+			public string Manufacturer{
+				get{
+					return manufacturer;
+				}
+			}
+			
+			public Item(){
+				Console.WriteLine("New Item Created");
+			}
+			
+			
+			
+			
+			
+		}
+		
 		
 	}
 
 	
 
 }
-
-
